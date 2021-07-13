@@ -1,7 +1,5 @@
 package com.shixun.zz_shixun01;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class ChatMessage {
@@ -23,22 +21,8 @@ public class ChatMessage {
         INCOMIMG, OUTCOMIMG
     }
 
-    @Override
-    public String toString() {
-        SimpleDateFormat sDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        String dstr = sDF.format(date);
-        String tstr = type.toString();
-        return msg+","+dstr+","+tstr;
-    }
-    public ChatMessage (String data) throws ParseException {
-        String[] datas = data.split(",");
-        SimpleDateFormat sDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        String msg = datas[0];
-        Date date = sDF.parse(datas[1]);
-        this.msg = msg;
-        this.date = date;
-        this.type = ChatMessage.Type.valueOf(datas[2]);
-    }
+
+
     public String getMsg() {
         return msg;
     }

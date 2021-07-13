@@ -7,7 +7,9 @@ import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class DBManager {
@@ -20,7 +22,6 @@ public class DBManager {
         this.context = context;
         DBHelper dbHelper = new DBHelper(context,"sent_storage",null,1);
         writableDatabase = dbHelper.getWritableDatabase();
-
     }
 
     public static DBManager getInstance(Context context){
@@ -39,11 +40,14 @@ public class DBManager {
 
         //for (int i = 0; i <msglist.size() ; i++) {
             ContentValues contentValues = new ContentValues();
-            String[] strs = msg.toString().split(",");
-            contentValues.put("_msg",strs[0]);
-            contentValues.put("_date",strs[1]);
-            contentValues.put("_type",strs[2]);
-            Log.i("typeStr",strs[2]);
+            String msgstr,dstr,typestr;
+            msgstr = msg.getMsg();
+            dstr = msg.getDate().toString();
+            typestr = msg.getType().toString();
+            contentValues.put("_msg",msgstr);
+            contentValues.put("_date",dstr);
+            contentValues.put("_type",typestr);
+            Log.i("typeStr",msgstr+"\t"+dstr+"\t"+typestr);
             writableDatabase.insert("msgs",null,contentValues);
             //writableDatabase.close();
         //}
@@ -54,17 +58,26 @@ public class DBManager {
         Cursor cursor = writableDatabase.query("msgs",null,null,null,null,null,null);
         while (cursor.moveToNext()){
             String msg = (String)cursor.getString(cursor.getColumnIndex("_msg"));
-            String date = (String)cursor.getString(cursor.getColumnIndex("_date"));
-            String type = (String)cursor.getString(cursor.getColumnIndex("_type"));
-            ChatMessage o = new ChatMessage(msg+","+date+","+type);
+            String datestr = (String)cursor.getString(cursor.getColumnIndex("_date"));
+            String typestr = (String)cursor.getString(cursor.getColumnIndex("_type"));
+            SimpleDateFormat sDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            Date date = sDF.parse(datestr);
+            ChatMessage.Type type = ChatMessage.Type.valueOf(typestr);
+            ChatMessage o = new ChatMessage(msg,date,type);
             result.add(o);
         }
         return result;
     }
 
     public void del(int i){
-        writableDatabase.delete("msgs","_type=?",new String[]{"INCOMING"});
-        writableDatabase.delete("msgs","_type=?",new String[]{"OUTCOMING"});
+        DBHelper dbHelper = new DBHelper(context,"sent_storage",null,1);
+        SQLiteDatabase deltmanger = dbHelper.getWritableDatabase();
+        deltmanger.delete("msgs","_type=?",new String[]{"INCOMING"});
+        deltmanger.delete("msgs","_type=?",new String[]{"OUTCOMING"});
         Log.i("dele","INCOMING".toString()+"");
+    }
+    public void dropTable(){
+        DBHelper dbHelper = new DBHelper(context,"sent_storage",null,2);
+
     }
 }

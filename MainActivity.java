@@ -35,7 +35,8 @@ public class MainActivity extends AppCompatActivity {
         Log.i("handle","hang");
         initView();
         dbmanager = new DBManager(this);
-
+//        dbmanager.del(2);
+//        dbmanager.dropTable();
         pastdatas = new ArrayList<>();
         // 数据库查询，读取旧的聊天信息
         try {
@@ -44,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
         pastdatas.add(new ChatMessage("亲！有什么问题吗?", new Date(), ChatMessage.Type.INCOMIMG));
-        //dbmanager.del(2);
+
 
 
         adapter = new ChatMessageAdapter(pastdatas, this);
@@ -118,5 +119,9 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
 
 
+    }
+
+    public void dele(View view) {
+        new DBHelper(this,"sent_storage",null,2);
     }
 }

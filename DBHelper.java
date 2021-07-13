@@ -28,6 +28,11 @@ public class DBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
+        switch (newVersion){
+            case 1:
+            case 2:
+                db.execSQL("drop table msgs");
+                break;
+        }
     }
 }
