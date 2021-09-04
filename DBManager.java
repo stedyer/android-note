@@ -70,10 +70,7 @@ public class DBManager {
     }
 
     public void del(int i){
-//
-//        int msgflag01 = writableDatabase.delete("msgs","_id=?",new String[]{1+""});
-//        int msgflag02 = writableDatabase.delete("msgs", "_id=?", new String[]{2+""});
-//        Log.i("ifdele",msgflag01+""+msgflag02);
+
         writableDatabase.execSQL("delete from msgs");
     }
     public void dropTable(){
