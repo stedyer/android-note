@@ -21,18 +21,22 @@ public class DBHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("create table msgs("+"_msg text,"+
-                    "_date text,"+
+                    "_date date,"+
                     "_type text"+")"
                 );
+
     }
+
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         switch (newVersion){
             case 1:
             case 2:
-                db.execSQL("drop table msgs");
+                db.execSQL("delete from msgs where _msg not null");
                 break;
         }
     }
+
+
 }

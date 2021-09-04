@@ -5,7 +5,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -41,15 +40,16 @@ public class DBManager {
         //for (int i = 0; i <msglist.size() ; i++) {
             ContentValues contentValues = new ContentValues();
             String msgstr,dstr,typestr;
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             msgstr = msg.getMsg();
-            dstr = msg.getDate().toString();
+            Date date = msg.getDate();
+            dstr = sdf.format(date);
             typestr = msg.getType().toString();
             contentValues.put("_msg",msgstr);
             contentValues.put("_date",dstr);
             contentValues.put("_type",typestr);
             Log.i("typeStr",msgstr+"\t"+dstr+"\t"+typestr);
             writableDatabase.insert("msgs",null,contentValues);
-            //writableDatabase.close();
         //}
     }
 
@@ -70,11 +70,11 @@ public class DBManager {
     }
 
     public void del(int i){
-        DBHelper dbHelper = new DBHelper(context,"sent_storage",null,1);
-        SQLiteDatabase deltmanger = dbHelper.getWritableDatabase();
-        deltmanger.delete("msgs","_type=?",new String[]{"INCOMING"});
-        deltmanger.delete("msgs","_type=?",new String[]{"OUTCOMING"});
-        Log.i("dele","INCOMING".toString()+"");
+//
+//        int msgflag01 = writableDatabase.delete("msgs","_id=?",new String[]{1+""});
+//        int msgflag02 = writableDatabase.delete("msgs", "_id=?", new String[]{2+""});
+//        Log.i("ifdele",msgflag01+""+msgflag02);
+        writableDatabase.execSQL("delete from msgs");
     }
     public void dropTable(){
         DBHelper dbHelper = new DBHelper(context,"sent_storage",null,2);

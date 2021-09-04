@@ -28,15 +28,14 @@ public class MainActivity extends AppCompatActivity {
     private Button sendMsg;//发送消息
     private ChatMessageAdapter adapter;
     private DBManager dbmanager;  //数据库管理工具类
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Log.i("handle","hang");
+        Log.i("handle", "hang");
         initView();
         dbmanager = new DBManager(this);
-//        dbmanager.del(2);
-//        dbmanager.dropTable();
         pastdatas = new ArrayList<>();
         // 数据库查询，读取旧的聊天信息
         try {
@@ -45,13 +44,10 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
         pastdatas.add(new ChatMessage("亲！有什么问题吗?", new Date(), ChatMessage.Type.INCOMIMG));
-
-
-
         adapter = new ChatMessageAdapter(pastdatas, this);
         listView.setAdapter(adapter);
-        listView.setSelection(pastdatas.size() -1);
-        }
+        listView.setSelection(pastdatas.size() - 1);
+    }
 
 
     private void initView() {
@@ -59,12 +55,13 @@ public class MainActivity extends AppCompatActivity {
         inputMsg = findViewById(R.id.input_msg);
         sendMsg = findViewById(R.id.btn_send);
     }
+
     @SuppressLint("HandlerLeak")
-    Handler handler=new Handler(){
+    Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
-            ChatMessage fromMessage= (ChatMessage) msg.obj;
+            ChatMessage fromMessage = (ChatMessage) msg.obj;
             pastdatas.add(fromMessage);
             adapter.notifyDataSetChanged();
 
@@ -122,6 +119,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void dele(View view) {
-        new DBHelper(this,"sent_storage",null,2);
+        dbmanager.del(3);
+        Toast.makeText(this, "清除成功!", Toast.LENGTH_SHORT).show();
+        pastdatas.removeAll(pastdatas);
+        adapter.notifyDataSetChanged();
     }
 }
