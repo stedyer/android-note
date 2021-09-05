@@ -1,6 +1,7 @@
 package com.shixun.zz_shixun01;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -14,7 +15,13 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -27,7 +34,6 @@ public class MainActivity extends AppCompatActivity {
     private EditText inputMsg;//输入消息
     private Button sendMsg;//发送消息
     private ChatMessageAdapter adapter;
-    private DBManager dbmanager;  //数据库管理工具类
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,18 +41,57 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Log.i("handle", "hang");
         initView();
-        dbmanager = new DBManager(this);
         pastdatas = new ArrayList<>();
-        // 数据库查询，读取旧的聊天信息
+
+        //读取文件,读取旧的聊天信息
+        BufferedInputStream inputStream = null;
         try {
-            pastdatas = dbmanager.query();
+            inputStream = new BufferedInputStream(openFileInput("msgs.txt"));
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            byte[] buffer = new byte[1024];
+            while (true){
+                int hanRead = inputStream.read(buffer);
+                if (hanRead<0){
+                    break;
+                }
+                baos.write(buffer,0,hanRead);
+            }
+            Log.i("empty",baos.toString().isEmpty()+"");
+            if(!baos.toString().isEmpty()){
+                String[] allmsgs = baos.toString().split("\n");
+                for (int i= 0; i <allmsgs.length ; i++) {
+                    String[] msg = allmsgs[i].split(",");
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    Date date = sdf.parse(msg[1]);
+                    ChatMessage.Type type = ChatMessage.Type.valueOf(msg[2]);
+                    ChatMessage chatMessage = new ChatMessage(msg[0],date,type);
+                    pastdatas.add(chatMessage);
+                }
+
+            }
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         } catch (ParseException e) {
             e.printStackTrace();
+        } finally {
+            if (inputStream!=null){
+                try {
+                    inputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
+
         pastdatas.add(new ChatMessage("亲！有什么问题吗?", new Date(), ChatMessage.Type.INCOMIMG));
+        save();
         adapter = new ChatMessageAdapter(pastdatas, this);
         listView.setAdapter(adapter);
         listView.setSelection(pastdatas.size() - 1);
+
     }
 
 
@@ -83,7 +128,6 @@ public class MainActivity extends AppCompatActivity {
         toMessage.setMsg(toMsg);//设置发送的内容
         toMessage.setType(ChatMessage.Type.OUTCOMIMG);//设置类型
         pastdatas.add(toMessage);//添加到集合中
-        dbmanager.add(toMessage);   //输入的消息存入数据库
         adapter.notifyDataSetChanged();//显示数据
         //实时显示消息,避免被遮盖
         listView.setSelection(pastdatas.size() - 1);
@@ -102,26 +146,52 @@ public class MainActivity extends AppCompatActivity {
                 m.obj = fromMessage;
                 //将数据发送出去
                 handler.sendMessage(m);
-
-                dbmanager.add(fromMessage);// 接收的消息存入数据库
-
-
             }
         }.start();
     }
 
+    public void save(){
+        BufferedOutputStream bos = null;
+        try {
+
+            bos = new BufferedOutputStream(openFileOutput("msgs.txt",Context.MODE_PRIVATE));
+            for (int i = 0;i<pastdatas.size();i++){
+                ChatMessage cm = pastdatas.get(i);
+                String msgstr = cm.getMsg();
+                Date date = cm.getDate();
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                String datestr = sdf.format(date);
+                String typestr = cm.getType().toString();
+                bos.write((msgstr+","+datestr+","+typestr).getBytes());
+                if (i<pastdatas.size()-1) bos.write("\n".getBytes());
+                bos.flush();
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally {
+            if (bos!=null){
+                try {
+                    bos.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
     @Override
     protected void onDestroy() {
-
         super.onDestroy();
-
+        save();
 
     }
 
     public void dele(View view) {
-        dbmanager.del(3);
+
         Toast.makeText(this, "清除成功!", Toast.LENGTH_SHORT).show();
         pastdatas.removeAll(pastdatas);
+        //save();
         adapter.notifyDataSetChanged();
     }
 }
