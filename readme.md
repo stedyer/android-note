@@ -1,2 +1,3 @@
-# 1 Android实训的java目录
+# Android实训的java目录
+**图灵实现聊天机器人**
 **消息的本地保存使用安卓sqlite数据库实现**
