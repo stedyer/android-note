@@ -1,6 +1,5 @@
-<<<<<<< Updated upstream
-#1 Android 实训项目的java目录
+Android 实训项目的java目录
 =======
-# Android ?????java??
-- ????????
->>>>>>> Stashed changes
+
+
+- 消息使用txt保存
